@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import logging
+import json
 
 # configure logger early to suppress known noisy warnings before importing discord
 logger = logging.getLogger()
@@ -45,6 +46,112 @@ EMOJI_POOL = ["🎉", "🏆", "✨", "🥳", "🎊", "🔥", "💥", "🎈", "�
 
 # colored circles for Memory game (memorize by color)
 MEMORY_COLORS = ["🔴", "🟠", "🟡", "🟢", "🔵", "🟣"]
+
+# credits storage
+CREDITS_FILE = "credits.json"
+
+# lightweight trivia bank
+TRIVIA_BANK = {
+    "easy": [
+        {"q": "What color do you get when you mix red and blue?", "a": "purple"},
+        {"q": "How many days are in a week?", "a": "7"},
+        {"q": "What planet do we live on?", "a": "earth"},
+        {"q": "Which animal says 'meow'?", "a": "cat"},
+        {"q": "What is 10 + 5?", "a": "15"},
+        {"q": "How many hours are in a day?", "a": "24"},
+        {"q": "What is 3 + 7?", "a": "10"},
+        {"q": "What is the opposite of hot?", "a": "cold"},
+        {"q": "What color is the sky on a clear day?", "a": "blue"},
+        {"q": "How many letters are in the English alphabet?", "a": "26"},
+        {"q": "What shape has three sides?", "a": "triangle"},
+        {"q": "Which animal barks?", "a": "dog"},
+        {"q": "What is 9 - 4?", "a": "5"},
+        {"q": "What do bees make?", "a": "honey"},
+        {"q": "What is 6 x 2?", "a": "12"},
+        {"q": "What is 5 + 9?", "a": "14"},
+        {"q": "What is 8 - 3?", "a": "5"},
+        {"q": "What is 4 x 4?", "a": "16"},
+        {"q": "What is 20 / 5?", "a": "4"},
+        {"q": "Which season comes after spring?", "a": "summer"},
+        {"q": "Which season is the coldest?", "a": "winter"},
+        {"q": "What do you call a baby cat?", "a": "kitten"},
+        {"q": "What color are bananas when ripe?", "a": "yellow"},
+        {"q": "How many legs does a spider have?", "a": "8"},
+        {"q": "What is the first month of the year?", "a": "january"},
+        {"q": "What is the last day of the week (commonly taught)?", "a": "sunday"},
+    ],
+    "medium": [
+        {"q": "What gas do plants absorb from the air?", "a": "carbon dioxide"},
+        {"q": "How many continents are there?", "a": "7"},
+        {"q": "What is the capital of Canada?", "a": "ottawa"},
+        {"q": "Which ocean is the largest?", "a": "pacific"},
+        {"q": "What is 12 × 8?", "a": "96"},
+        {"q": "What is the capital of Spain?", "a": "madrid"},
+        {"q": "Who painted the Mona Lisa?", "a": "leonardo da vinci"},
+        {"q": "What is the largest planet in our solar system?", "a": "jupiter"},
+        {"q": "What is H2O commonly called?", "a": "water"},
+        {"q": "Which instrument has 88 keys?", "a": "piano"},
+        {"q": "What is 15% of 200?", "a": "30"},
+        {"q": "What is the freezing point of water in Celsius?", "a": "0"},
+        {"q": "Which continent is the Sahara Desert on?", "a": "africa"},
+        {"q": "How many minutes are in an hour?", "a": "60"},
+        {"q": "What is the capital of Japan?", "a": "tokyo"},
+        {"q": "What is the largest mammal?", "a": "blue whale"},
+        {"q": "Which planet is closest to the sun?", "a": "mercury"},
+        {"q": "What is the main ingredient in bread?", "a": "flour"},
+        {"q": "How many sides does a hexagon have?", "a": "6"},
+        {"q": "What is the capital of Brazil?", "a": "brasilia"},
+        {"q": "What is 9 x 11?", "a": "99"},
+        {"q": "Who wrote 'Romeo and Juliet'?", "a": "william shakespeare"},
+        {"q": "What is the currency of Japan?", "a": "yen"},
+        {"q": "What is the largest continent?", "a": "asia"},
+        {"q": "Which metal is liquid at room temperature?", "a": "mercury"},
+    ],
+    "hard": [
+        {"q": "What is the chemical symbol for gold?", "a": "au"},
+        {"q": "Which planet has the most moons (as commonly taught)?", "a": "saturn"},
+        {"q": "What year did the first iPhone release?", "a": "2007"},
+        {"q": "What is the square root of 144?", "a": "12"},
+        {"q": "What is the capital of Australia?", "a": "canberra"},
+        {"q": "What is the longest river in the world (commonly taught)?", "a": "nile"},
+        {"q": "Who wrote '1984'?", "a": "george orwell"},
+        {"q": "What is the chemical symbol for potassium?", "a": "k"},
+        {"q": "Which element has atomic number 8?", "a": "oxygen"},
+        {"q": "How many bones are in the adult human body?", "a": "206"},
+        {"q": "What year did World War II end?", "a": "1945"},
+        {"q": "What is the smallest prime number?", "a": "2"},
+        {"q": "What is the capital of New Zealand?", "a": "wellington"},
+        {"q": "Which planet is known as the Red Planet?", "a": "mars"},
+        {"q": "What is the speed of light in vacuum (km/s, rounded)?", "a": "300000"},
+        {"q": "What is the chemical symbol for sodium?", "a": "na"},
+        {"q": "Which gas is most abundant in Earth's atmosphere?", "a": "nitrogen"},
+        {"q": "What is the capital of Norway?", "a": "oslo"},
+        {"q": "What is 17 x 19?", "a": "323"},
+        {"q": "Which element has atomic number 26?", "a": "iron"},
+        {"q": "What is the smallest planet in our solar system?", "a": "mercury"},
+        {"q": "Which composer wrote the 'Moonlight Sonata'?", "a": "beethoven"},
+        {"q": "What is the capital of Thailand?", "a": "bangkok"},
+        {"q": "Which blood type is the universal donor?", "a": "o negative"},
+        {"q": "What is the value of pi to three decimal places?", "a": "3.142"},
+    ],
+    "nightmare": [
+        {"q": "What is the only even prime number?", "a": "2"},
+        {"q": "What is the derivative of sin(x)? (one word)", "a": "cos"},
+        {"q": "In chess notation, what is the letter for a knight?", "a": "n"},
+        {"q": "What is the chemical symbol for tungsten?", "a": "w"},
+        {"q": "What is the 12th Fibonacci number? (F1=1, F2=1)", "a": "144"},
+        {"q": "What is the capital of Iceland?", "a": "reykjavik"},
+        {"q": "What is the SI unit of electric resistance?", "a": "ohm"},
+        {"q": "What is 2^10?", "a": "1024"},
+        {"q": "What is the base-2 representation of the number 10?", "a": "1010"},
+        {"q": "What is the chemical symbol for antimony?", "a": "sb"},
+        {"q": "Who wrote 'The Republic'?", "a": "plato"},
+        {"q": "What is the largest bone in the human body?", "a": "femur"},
+        {"q": "What is the term for a word that reads the same backward?", "a": "palindrome"},
+        {"q": "What is the square root of 169?", "a": "13"},
+        {"q": "What is the sum of the angles in a triangle (degrees)?", "a": "180"},
+    ],
+}
 
 
 def format_prize_with_multiplier(prize: str, multiplier: int) -> str:
@@ -239,6 +346,87 @@ def parse_bid_amount(s: str) -> int:
     return amt
 
 
+def resolve_role_from_input(role_input: str, guild: Optional[discord.Guild]):
+    if not role_input:
+        return None, None
+    if not guild:
+        return None, "This server role requirement can't be set outside a server."
+    role = None
+    m = re.search(r'(\d{5,})', role_input)
+    if m:
+        try:
+            role = guild.get_role(int(m.group(1)))
+        except Exception:
+            role = None
+    if role is None:
+        for r in guild.roles:
+            if r.name.lower() == role_input.lower():
+                role = r
+                break
+    if role is None:
+        return None, "Role not found. Use a role mention, ID, or exact name."
+    return role, None
+
+
+def load_credits() -> dict:
+    try:
+        if not os.path.exists(CREDITS_FILE):
+            return {}
+        with open(CREDITS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        # ensure int values
+        return {str(k): int(v) for k, v in data.items()}
+    except Exception:
+        return {}
+
+
+def save_credits(credits: dict) -> None:
+    try:
+        with open(CREDITS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(credits, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+
+def prize_to_credits(prize: str) -> int:
+    if not prize:
+        return 0
+    s = prize.strip().lower().replace(',', '')
+    if s.startswith('$'):
+        s = s[1:]
+    # extract first number+suffix occurrence
+    m = re.search(r'([0-9]+(?:\.[0-9]+)?)([kmb])\b', s)
+    if not m:
+        return 0
+    num = float(m.group(1))
+    suf = m.group(2)
+    if suf == 'm':
+        return int(num)
+    if suf == 'b':
+        return int(num * 1000)
+    # k or anything below 1m yields 0 credits
+    return 0
+
+
+async def award_credits_for_prize(botref, user_ids, prize: str, multiplier: int = 1, split: int = 1):
+    if not user_ids:
+        return
+    base = prize_to_credits(prize)
+    if base <= 0:
+        return
+    total = int(base * multiplier)
+    per_user = int(total / max(1, split))
+    if per_user <= 0:
+        return
+    async with DATA_LOCK:
+        credits = botref.credits
+        for uid in user_ids:
+            key = str(uid)
+            credits[key] = int(credits.get(key, 0)) + per_user
+        botref.credits = credits
+        save_credits(botref.credits)
+
+
 class JoinView(discord.ui.View):
     def __init__(self, gid: str, bot_ref):
         super().__init__(timeout=None)
@@ -247,9 +435,44 @@ class JoinView(discord.ui.View):
         join_btn = discord.ui.Button(label="Join", style=discord.ButtonStyle.success)
 
         async def join_cb(interaction: discord.Interaction):
+            req_role_id = None
             async with DATA_LOCK:
                 game = None
-                for d in (self.bot.active_giveaways, self.bot.active_sos, self.bot.active_dbd, self.bot.active_rps, self.bot.active_memory, self.bot.active_maze, self.bot.active_reactroulette):
+                for d in (self.bot.active_giveaways, self.bot.active_sos, self.bot.active_dbd, self.bot.active_rps, self.bot.active_memory, self.bot.active_maze, self.bot.active_reactroulette, self.bot.active_trivia, self.bot.active_don):
+                    g = d.get(self.gid)
+                    if g:
+                        game = g
+                        break
+                if not game:
+                    await interaction.response.send_message("This game is no longer active.", ephemeral=True)
+                    return
+                req_role_id = game.get('allowed_role_id')
+                entries = game.get('entries', set())
+                if interaction.user.id in entries:
+                    await interaction.response.send_message("You've already joined.", ephemeral=True)
+                    return
+
+            if req_role_id:
+                if not interaction.guild:
+                    await interaction.response.send_message("This game requires a role, but this interaction isn't in a server.", ephemeral=True)
+                    return
+                role = interaction.guild.get_role(req_role_id)
+                if not role:
+                    await interaction.response.send_message("The required role no longer exists.", ephemeral=True)
+                    return
+                member = interaction.user
+                if not isinstance(member, discord.Member):
+                    try:
+                        member = await interaction.guild.fetch_member(interaction.user.id)
+                    except Exception:
+                        member = None
+                if not member or role not in getattr(member, "roles", []):
+                    await interaction.response.send_message(f"Only members with the {role.mention} role can join.", ephemeral=True)
+                    return
+
+            async with DATA_LOCK:
+                game = None
+                for d in (self.bot.active_giveaways, self.bot.active_sos, self.bot.active_dbd, self.bot.active_rps, self.bot.active_memory, self.bot.active_maze, self.bot.active_reactroulette, self.bot.active_trivia, self.bot.active_don):
                     g = d.get(self.gid)
                     if g:
                         game = g
@@ -272,13 +495,14 @@ class JoinView(discord.ui.View):
                         msg = await ch.fetch_message(game.get('message_id'))
                 if msg and msg.embeds:
                     old = msg.embeds[0]
-                    new = discord.Embed(title=old.title, description=old.description, color=old.color)
+                    # clone the embed to preserve fields, footer, thumbnail, etc.
+                    new = discord.Embed.from_dict(old.to_dict())
                     # get the latest entries count from current game state to avoid stale counts
                     try:
                         latest_count = None
                         async with DATA_LOCK:
                             latest_game = None
-                            for d in (self.bot.active_giveaways, self.bot.active_sos, self.bot.active_dbd, self.bot.active_rps, self.bot.active_memory, self.bot.active_maze, self.bot.active_reactroulette):
+                            for d in (self.bot.active_giveaways, self.bot.active_sos, self.bot.active_dbd, self.bot.active_rps, self.bot.active_memory, self.bot.active_maze, self.bot.active_reactroulette, self.bot.active_trivia, self.bot.active_don):
                                 g = d.get(self.gid)
                                 if g:
                                     latest_game = g
@@ -287,11 +511,18 @@ class JoinView(discord.ui.View):
                                 latest_count = len(latest_game.get('entries', []))
                     except Exception:
                         latest_count = None
-                    for f in old.fields:
+                    found_entries = False
+                    for idx, f in enumerate(new.fields):
                         if f.name.lower() == 'entries':
-                            new.add_field(name=f.name, value=str(latest_count if latest_count is not None else len(entries)))
-                        else:
-                            new.add_field(name=f.name, value=f.value)
+                            found_entries = True
+                            new.set_field_at(
+                                idx,
+                                name=f.name,
+                                value=str(latest_count if latest_count is not None else len(entries)),
+                                inline=f.inline,
+                            )
+                    if not found_entries:
+                        new.add_field(name="Entries", value=str(latest_count if latest_count is not None else len(entries)))
                     try:
                         # re-attach a fresh JoinView so the message keeps a working view
                         await msg.edit(embed=new, view=JoinView(self.gid, self.bot))
@@ -306,6 +537,134 @@ class JoinView(discord.ui.View):
 
         join_btn.callback = join_cb
         self.add_item(join_btn)
+
+
+class LuckyNumberView(discord.ui.View):
+    def __init__(self, sid: str, bot_ref):
+        super().__init__(timeout=None)
+        self.sid = sid
+        self.bot = bot_ref
+        guess_btn = discord.ui.Button(label="Enter Number", style=discord.ButtonStyle.primary)
+
+        async def guess_cb(interaction: discord.Interaction):
+            botref = self.bot
+            sid = self.sid
+            async with DATA_LOCK:
+                game = botref.active_luckynumber.get(sid)
+            if not game:
+                await interaction.response.send_message("This game is no longer active.", ephemeral=True)
+                return
+            req_role_id = game.get('allowed_role_id')
+            if req_role_id:
+                if not interaction.guild:
+                    await interaction.response.send_message("This game requires a role, but this interaction isn't in a server.", ephemeral=True)
+                    return
+                role = interaction.guild.get_role(req_role_id)
+                if not role:
+                    await interaction.response.send_message("The required role no longer exists.", ephemeral=True)
+                    return
+                member = interaction.user
+                if not isinstance(member, discord.Member):
+                    try:
+                        member = await interaction.guild.fetch_member(interaction.user.id)
+                    except Exception:
+                        member = None
+                if not member or role not in getattr(member, "roles", []):
+                    await interaction.response.send_message(f"Only members with the {role.mention} role can play.", ephemeral=True)
+                    return
+
+            class GuessModal(discord.ui.Modal, title="Lucky Number: Guess"):
+                guess = discord.ui.TextInput(
+                    label="Your number (1-100)",
+                    style=discord.TextStyle.short,
+                    placeholder="e.g. 42",
+                    required=True,
+                    max_length=3,
+                )
+
+                async def on_submit(self, modal_interaction: discord.Interaction):
+                    # validate input
+                    try:
+                        val = int(self.guess.value.strip())
+                        if val < 1 or val > 100:
+                            raise ValueError("Out of range")
+                    except Exception:
+                        await modal_interaction.response.send_message("Please enter a whole number from 1 to 100.", ephemeral=True)
+                        return
+
+                    async with DATA_LOCK:
+                        game = botref.active_luckynumber.get(sid)
+                    if not game:
+                        await modal_interaction.response.send_message("This game is no longer active.", ephemeral=True)
+                        return
+
+                    # re-check role requirement at submit time
+                    req_role_id = game.get('allowed_role_id')
+                    if req_role_id:
+                        if not modal_interaction.guild:
+                            await modal_interaction.response.send_message("This game requires a role, but this interaction isn't in a server.", ephemeral=True)
+                            return
+                        role = modal_interaction.guild.get_role(req_role_id)
+                        if not role:
+                            await modal_interaction.response.send_message("The required role no longer exists.", ephemeral=True)
+                            return
+                        member = modal_interaction.user
+                        if not isinstance(member, discord.Member):
+                            try:
+                                member = await modal_interaction.guild.fetch_member(modal_interaction.user.id)
+                            except Exception:
+                                member = None
+                        if not member or role not in getattr(member, "roles", []):
+                            await modal_interaction.response.send_message(f"Only members with the {role.mention} role can play.", ephemeral=True)
+                            return
+
+                    # track unique participants
+                    async with DATA_LOCK:
+                        game = botref.active_luckynumber.get(sid)
+                        if not game:
+                            await modal_interaction.response.send_message("This game is no longer active.", ephemeral=True)
+                            return
+                        entries = game.get('entries', set())
+                        if modal_interaction.user.id not in entries:
+                            entries.add(modal_interaction.user.id)
+                            game['entries'] = entries
+                        game['guesses'] = int(game.get('guesses', 0)) + 1
+                        botref.active_luckynumber[sid] = game
+
+                    # update entries on the embed
+                    try:
+                        msg = None
+                        if game.get('channel_id'):
+                            ch = botref.get_channel(game.get('channel_id'))
+                            if ch:
+                                msg = await ch.fetch_message(game.get('message_id'))
+                        if msg and msg.embeds:
+                            old = msg.embeds[0]
+                            new = discord.Embed.from_dict(old.to_dict())
+                            found_entries = False
+                            count = game.get('guesses', 0)
+                            for idx, f in enumerate(new.fields):
+                                if f.name.lower() == 'guesses':
+                                    found_entries = True
+                                    new.set_field_at(idx, name=f.name, value=str(count), inline=f.inline)
+                            if not found_entries:
+                                new.add_field(name="Guesses", value=str(count))
+                            await msg.edit(embed=new, view=LuckyNumberView(sid, botref))
+                    except Exception:
+                        pass
+
+                    # check guess
+                    target = game.get('target')
+                    if val == target:
+                        await modal_interaction.response.send_message("Correct! You got it.", ephemeral=True)
+                        await finalize_luckynumber(sid, modal_interaction.user.id, val)
+                        return
+                    await modal_interaction.response.send_message("Sorry, wrong number. Try again!", ephemeral=True)
+
+            await interaction.response.send_modal(GuessModal())
+
+        guess_btn.callback = guess_cb
+        self.add_item(guess_btn)
 
 
 class MemorySubmitView(discord.ui.View):
@@ -350,6 +709,8 @@ class MemorySubmitView(discord.ui.View):
                         await channel.send(msg)
                     except Exception:
                         pass
+                if correct:
+                    await award_credits_for_prize(botref, [winner_id], prize)
                 await modal_interaction.response.send_message("Your answer has been submitted.", ephemeral=True)
                 # cleanup
                 async with DATA_LOCK:
@@ -445,6 +806,34 @@ class MemoryConfirmView(discord.ui.View):
         self.stop()
 
 
+class TriviaConfirmView(discord.ui.View):
+    def __init__(self, participant_id: int):
+        super().__init__(timeout=30)
+        self.participant_id = participant_id
+        self.confirmed = None
+
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.success, custom_id="trivia_confirm_yes")
+    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.participant_id:
+            await interaction.response.send_message("This button isn't for you.", ephemeral=True)
+            return
+        self.confirmed = True
+        await interaction.response.send_message("Answer locked in.", ephemeral=True)
+        self.stop()
+
+    @discord.ui.button(label="No, redo", style=discord.ButtonStyle.secondary, custom_id="trivia_confirm_no")
+    async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.participant_id:
+            await interaction.response.send_message("This button isn't for you.", ephemeral=True)
+            return
+        self.confirmed = False
+        try:
+            await interaction.response.defer()
+        except Exception:
+            pass
+        self.stop()
+
+
 class RpsChoiceView(discord.ui.View):
     def __init__(self, sid: str, participant_id: int, bot):
         super().__init__(timeout=300)
@@ -507,6 +896,7 @@ class RpsChoiceView(discord.ui.View):
                             await channel.send(f"{emoji} <@{winner}> successfully navigated the maze and WON {prize}! {emoji}")
                     except Exception:
                         pass
+                    await award_credits_for_prize(botref, [winner], prize)
             return
         else:
             # wrong — fail
@@ -614,6 +1004,7 @@ class MazeChoiceView(discord.ui.View):
                                 await channel.send(f"{emoji} <@{winner}> successfully navigated the maze and WON {prize}! {emoji}")
                         except Exception:
                             pass
+                        await award_credits_for_prize(botref, [winner], prize)
                 return
             else:
                 # wrong — fail
@@ -659,6 +1050,59 @@ class DbdChoiceView(discord.ui.View):
             pass
         try:
             await interaction.response.send_message("You chose to KEEP.", ephemeral=True)
+        except Exception:
+            pass
+        self.stop()
+
+    @discord.ui.button(label="Double", style=discord.ButtonStyle.primary, custom_id="dbd_double")
+    async def double(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.participant_id:
+            await interaction.response.send_message("This button isn't for you.", ephemeral=True)
+            return
+        try:
+            await process_dbd_choice(self.bot, self.sid, interaction.user.id, 'double')
+        except Exception:
+            pass
+        try:
+            await interaction.response.send_message("You chose to DOUBLE.", ephemeral=True)
+        except Exception:
+            pass
+        self.stop()
+
+
+class DonChoiceView(discord.ui.View):
+    def __init__(self, sid: str, participant_id: int, bot):
+        super().__init__(timeout=300)
+        self.sid = sid
+        self.participant_id = participant_id
+        self.bot = bot
+
+    @discord.ui.button(label="Keep", style=discord.ButtonStyle.secondary, custom_id="don_keep")
+    async def keep(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.participant_id:
+            await interaction.response.send_message("This button isn't for you.", ephemeral=True)
+            return
+        try:
+            asyncio.create_task(process_don_choice(self.bot, self.sid, interaction.user.id, "keep"))
+        except Exception:
+            pass
+        try:
+            await interaction.response.send_message("You chose to KEEP.", ephemeral=True)
+        except Exception:
+            pass
+        self.stop()
+
+    @discord.ui.button(label="Double (50/50)", style=discord.ButtonStyle.primary, custom_id="don_double")
+    async def double(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.participant_id:
+            await interaction.response.send_message("This button isn't for you.", ephemeral=True)
+            return
+        try:
+            asyncio.create_task(process_don_choice(self.bot, self.sid, interaction.user.id, "double"))
+        except Exception:
+            pass
+        try:
+            await interaction.response.send_message("You chose to DOUBLE. Good luck!", ephemeral=True)
         except Exception:
             pass
         self.stop()
@@ -731,21 +1175,6 @@ class ChoiceView(discord.ui.View):
         self.add_item(split_btn)
         self.add_item(steal_btn)
 
-    @discord.ui.button(label="Double", style=discord.ButtonStyle.primary, custom_id="dbd_double")
-    async def double(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if interaction.user.id != self.participant_id:
-            await interaction.response.send_message("This button isn't for you.", ephemeral=True)
-            return
-        try:
-            await process_dbd_choice(self.bot, self.sid, interaction.user.id, 'double')
-        except Exception:
-            pass
-        try:
-            await interaction.response.send_message("You chose to DOUBLE.", ephemeral=True)
-        except Exception:
-            pass
-        self.stop()
-
 
 class ReactAcceptView(discord.ui.View):
     def __init__(self, sid: str, candidate_id: int):
@@ -771,7 +1200,36 @@ class ReactAcceptView(discord.ui.View):
         self.result = 'pass'
         await interaction.response.send_message("You passed the prize.", ephemeral=True)
         self.stop()
-        
+
+
+class ReactRouletteChoiceView(discord.ui.View):
+    def __init__(self, sid: str, winner_id: int, bot, options):
+        super().__init__(timeout=300)
+        self.sid = sid
+        self.winner_id = winner_id
+        self.bot = bot
+        self.options = options
+        self.chosen = None
+        self._build_buttons()
+
+    def _build_buttons(self):
+        for idx, e in enumerate(self.options):
+            btn = discord.ui.Button(label=e, style=discord.ButtonStyle.secondary, custom_id=f"rr_pick_{self.sid}_{idx}")
+
+            async def _cb(interaction: discord.Interaction, emoji=e):
+                if interaction.user.id != self.winner_id:
+                    await interaction.response.send_message("This button isn't for you.", ephemeral=True)
+                    return
+                self.chosen = emoji
+                try:
+                    await interaction.response.send_message(f"You chose {emoji}. Good luck!", ephemeral=True)
+                except Exception:
+                    pass
+                self.stop()
+
+            btn.callback = _cb
+            self.add_item(btn)
+
 
 
 GUILD_ID = 1463372894984867985
@@ -797,7 +1255,11 @@ class MyBot(commands.Bot):
         self.active_dbd = {}
         self.active_maze = {}
         self.active_reactroulette = {}
+        self.active_luckynumber = {}
+        self.active_trivia = {}
+        self.active_don = {}
         self.active_auctions = {}
+        self.credits = load_credits()
         # store recently ended giveaways for rerolls: message_id -> snapshot
         self.recent_giveaways = {}
         self._guild_id = guild_id
@@ -878,9 +1340,15 @@ async def gwmake(interaction: discord.Interaction):
         duration = discord.ui.TextInput(label="Duration (e.g. 5d, 2h30m)", style=discord.TextStyle.short, placeholder="5d", required=True)
         winners = discord.ui.TextInput(label="Number of winners", style=discord.TextStyle.short, placeholder="1", required=True, max_length=3)
         prize = discord.ui.TextInput(label="Prize description", style=discord.TextStyle.long, placeholder="Describe the prize", required=True)
+        allowed_role = discord.ui.TextInput(
+            label="Required role (optional)",
+            style=discord.TextStyle.short,
+            placeholder="Role mention or ID (leave blank for none)",
+            required=False,
+            max_length=64,
+        )
 
         async def on_submit(self, modal_interaction: discord.Interaction):
-            await modal_interaction.response.defer(thinking=True)
             # parse duration
             try:
                 seconds = parse_duration(self.duration.value)
@@ -896,6 +1364,14 @@ async def gwmake(interaction: discord.Interaction):
                 await modal_interaction.response.send_message(f"Invalid winners value: {e}", ephemeral=True)
                 return
             prize_text = self.prize.value.strip() or "a prize"
+            role_id = None
+            role_input = self.allowed_role.value.strip()
+            if role_input:
+                role, err = resolve_role_from_input(role_input, modal_interaction.guild)
+                if err:
+                    await modal_interaction.response.send_message(err, ephemeral=True)
+                    return
+                role_id = role.id if role else None
             gid = uuid.uuid4().hex[:8]
             end_time = datetime.now(timezone.utc) + timedelta(seconds=seconds)
             gw = {
@@ -908,13 +1384,13 @@ async def gwmake(interaction: discord.Interaction):
                 'mode': 'Giveaway',
                 'channel_id': modal_interaction.channel.id if modal_interaction.channel else None,
                 'message_id': None,
+                'allowed_role_id': role_id,
             }
             view = JoinView(gid, bot)
-            embed = discord.Embed(title="Giveaway", description=f"Prize: {prize_text}", color=discord.Color.blurple())
+            embed = discord.Embed(title=prize_text, description="Giveaway", color=discord.Color.blurple())
             ts = int(end_time.timestamp())
             embed.add_field(name="Ends", value=f"<t:{ts}:F> (<t:{ts}:R>)")
             embed.add_field(name="Winners", value=str(gw['winners']))
-            embed.add_field(name="Mode", value="Giveaway")
             embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
             embed.add_field(name="Entries", value="0")
             # send in the same channel where the command was invoked
@@ -952,9 +1428,11 @@ async def handle_giveaway_end(gid: str, delay: int):
     if entries:
         k = min(gw['winners'], len(entries))
         winners = random.sample(entries, k)
+    # award credits for winners
+    if winners:
+        await award_credits_for_prize(bot, winners, gw.get('prize'))
     embed = discord.Embed(title="Giveaway Ended", description=f"Prize: {gw['prize']}")
     embed.add_field(name="Winners", value=', '.join(f"<@{w}>" for w in winners) if winners else "No valid entries")
-    embed.add_field(name="Mode", value=str(gw.get('mode', 'Giveaway')))
     embed.add_field(name="Host", value=f"<@{gw.get('creator')}>", inline=False)
     embed.add_field(name="Entries", value=str(len(entries)))
     if message:
@@ -1007,15 +1485,29 @@ async def sos(interaction: discord.Interaction):
     class SOSModal(discord.ui.Modal, title="Create Split Or Steal"):
         duration = discord.ui.TextInput(label="Duration (e.g. 5d, 2h30m)", style=discord.TextStyle.short, placeholder="5d", required=True)
         prize = discord.ui.TextInput(label="Prize description", style=discord.TextStyle.long, placeholder="Describe the prize", required=True)
+        allowed_role = discord.ui.TextInput(
+            label="Required role (optional)",
+            style=discord.TextStyle.short,
+            placeholder="Role mention or ID (leave blank for none)",
+            required=False,
+            max_length=64,
+        )
 
         async def on_submit(self, modal_interaction: discord.Interaction):
-            await modal_interaction.response.defer(thinking=True)
             try:
                 seconds = parse_duration(self.duration.value)
             except Exception as e:
                 await modal_interaction.response.send_message(f"Invalid duration: {e}", ephemeral=True)
                 return
             prize_text = self.prize.value.strip() or "a split-or-steal game"
+            role_id = None
+            role_input = self.allowed_role.value.strip()
+            if role_input:
+                role, err = resolve_role_from_input(role_input, modal_interaction.guild)
+                if err:
+                    await modal_interaction.response.send_message(err, ephemeral=True)
+                    return
+                role_id = role.id if role else None
             sid = uuid.uuid4().hex[:8]
             end_time = datetime.now(timezone.utc) + timedelta(seconds=seconds)
             sos = {
@@ -1030,13 +1522,13 @@ async def sos(interaction: discord.Interaction):
                 'choices': {},
                 'winners': [],
                 'num_winners': 2,
+                'allowed_role_id': role_id,
             }
             view = JoinView(sid, bot)
-            embed = discord.Embed(title="Split Or Steal: Join", description=f"Prize: {prize_text}")
+            embed = discord.Embed(title=prize_text, description="Split Or Steal: Join")
             ts = int(end_time.timestamp())
             embed.add_field(name="Ends", value=f"<t:{ts}:F> (<t:{ts}:R>)")
             embed.add_field(name="Winners", value="2")
-            embed.add_field(name="Mode", value="Split or Steal")
             embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
             embed.add_field(name="Entries", value="0")
             if sos['channel_id'] is None:
@@ -1064,15 +1556,29 @@ async def rps(interaction: discord.Interaction):
     class RpsModal(discord.ui.Modal, title="Create Rock Paper Scissors"):
         duration = discord.ui.TextInput(label="Duration (e.g. 5d, 2h30m)", style=discord.TextStyle.short, placeholder="5d", required=True)
         prize = discord.ui.TextInput(label="Prize description", style=discord.TextStyle.long, placeholder="Describe the prize", required=True)
+        allowed_role = discord.ui.TextInput(
+            label="Required role (optional)",
+            style=discord.TextStyle.short,
+            placeholder="Role mention or ID (leave blank for none)",
+            required=False,
+            max_length=64,
+        )
 
         async def on_submit(self, modal_interaction: discord.Interaction):
-            await modal_interaction.response.defer(thinking=True)
             try:
                 seconds = parse_duration(self.duration.value)
             except Exception as e:
                 await modal_interaction.response.send_message(f"Invalid duration: {e}", ephemeral=True)
                 return
             prize_text = self.prize.value.strip() or "a prize"
+            role_id = None
+            role_input = self.allowed_role.value.strip()
+            if role_input:
+                role, err = resolve_role_from_input(role_input, modal_interaction.guild)
+                if err:
+                    await modal_interaction.response.send_message(err, ephemeral=True)
+                    return
+                role_id = role.id if role else None
             sid = uuid.uuid4().hex[:8]
             end_time = datetime.now(timezone.utc) + timedelta(seconds=seconds)
             rps_game = {
@@ -1087,13 +1593,13 @@ async def rps(interaction: discord.Interaction):
                 'choices': {},
                 'winners': [],
                 'num_winners': 2,
+                'allowed_role_id': role_id,
             }
             view = JoinView(sid, bot)
-            embed = discord.Embed(title="Rock Paper Scissors: Join", description=f"Prize: {prize_text}")
+            embed = discord.Embed(title=prize_text, description="Rock Paper Scissors: Join")
             ts = int(end_time.timestamp())
             embed.add_field(name="Ends", value=f"<t:{ts}:F> (<t:{ts}:R>)")
             embed.add_field(name="Winners", value="2")
-            embed.add_field(name="Mode", value="Rock Paper Scissors")
             embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
             embed.add_field(name="Entries", value="0")
             if rps_game['channel_id'] is None:
@@ -1122,15 +1628,29 @@ async def dbd(interaction: discord.Interaction):
     class DbdModal(discord.ui.Modal, title="Create Double Down (DBD)"):
         duration = discord.ui.TextInput(label="Duration (e.g. 5d, 2h30m)", style=discord.TextStyle.short, placeholder="5d", required=True)
         prize = discord.ui.TextInput(label="Prize description", style=discord.TextStyle.long, placeholder="Describe the prize", required=True)
+        allowed_role = discord.ui.TextInput(
+            label="Required role (optional)",
+            style=discord.TextStyle.short,
+            placeholder="Role mention or ID (leave blank for none)",
+            required=False,
+            max_length=64,
+        )
 
         async def on_submit(self, modal_interaction: discord.Interaction):
-            await modal_interaction.response.defer(thinking=True)
             try:
                 seconds = parse_duration(self.duration.value)
             except Exception as e:
                 await modal_interaction.response.send_message(f"Invalid duration: {e}", ephemeral=True)
                 return
             prize_text = self.prize.value.strip() or "a prize"
+            role_id = None
+            role_input = self.allowed_role.value.strip()
+            if role_input:
+                role, err = resolve_role_from_input(role_input, modal_interaction.guild)
+                if err:
+                    await modal_interaction.response.send_message(err, ephemeral=True)
+                    return
+                role_id = role.id if role else None
             sid = uuid.uuid4().hex[:8]
             end_time = datetime.now(timezone.utc) + timedelta(seconds=seconds)
             dbd_game = {
@@ -1146,13 +1666,13 @@ async def dbd(interaction: discord.Interaction):
                 'message_id': None,
                 'attempted': [],
                 'choices': {},
+                'allowed_role_id': role_id,
             }
             view = JoinView(sid, bot)
-            embed = discord.Embed(title="Double Down: Join", description=f"Prize: {prize_text}")
+            embed = discord.Embed(title=prize_text, description="Double Down: Join")
             ts = int(end_time.timestamp())
             embed.add_field(name="Ends", value=f"<t:{ts}:F> (<t:{ts}:R>)")
             embed.add_field(name="Winners", value="1")
-            embed.add_field(name="Mode", value="Double Down")
             embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
             embed.add_field(name="Entries", value="0")
             if dbd_game['channel_id'] is None:
@@ -1181,15 +1701,29 @@ async def memory(interaction: discord.Interaction):
     class MemoryModalCreate(discord.ui.Modal, title="Create Memory Game"):
         duration = discord.ui.TextInput(label="Duration (e.g. 30s, 2m)", style=discord.TextStyle.short, placeholder="30s", required=True)
         prize = discord.ui.TextInput(label="Prize description", style=discord.TextStyle.long, placeholder="Describe the prize", required=True)
+        allowed_role = discord.ui.TextInput(
+            label="Required role (optional)",
+            style=discord.TextStyle.short,
+            placeholder="Role mention or ID (leave blank for none)",
+            required=False,
+            max_length=64,
+        )
 
         async def on_submit(self, modal_interaction: discord.Interaction):
-            await modal_interaction.response.defer(thinking=True)
             try:
                 seconds = parse_duration(self.duration.value)
             except Exception as e:
                 await modal_interaction.response.send_message(f"Invalid duration: {e}", ephemeral=True)
                 return
             prize_text = self.prize.value.strip() or "a prize"
+            role_id = None
+            role_input = self.allowed_role.value.strip()
+            if role_input:
+                role, err = resolve_role_from_input(role_input, modal_interaction.guild)
+                if err:
+                    await modal_interaction.response.send_message(err, ephemeral=True)
+                    return
+                role_id = role.id if role else None
             sid = uuid.uuid4().hex[:8]
             end_time = datetime.now(timezone.utc) + timedelta(seconds=seconds)
             # generate sequence of colored circles (memorize by color)
@@ -1205,13 +1739,13 @@ async def memory(interaction: discord.Interaction):
                 'message_id': None,
                 'sequence': seq,
                 'winner': None,
+                'allowed_role_id': role_id,
             }
             view = JoinView(sid, bot)
-            embed = discord.Embed(title="Memory: Join", description=f"Prize: {prize_text}")
+            embed = discord.Embed(title=prize_text, description="Memory: Join")
             ts = int(end_time.timestamp())
             embed.add_field(name="Ends", value=f"<t:{ts}:F> (<t:{ts}:R>)")
             embed.add_field(name="Winners", value="1")
-            embed.add_field(name="Mode", value="Memory")
             embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
             embed.add_field(name="Entries", value="0")
             if memory_game['channel_id'] is None:
@@ -1241,9 +1775,15 @@ async def maze(interaction: discord.Interaction):
         duration = discord.ui.TextInput(label="Duration (e.g. 30s, 2m)", style=discord.TextStyle.short, placeholder="30s", required=True)
         prize = discord.ui.TextInput(label="Prize description", style=discord.TextStyle.long, placeholder="Describe the prize", required=True)
         length = discord.ui.TextInput(label="Maze length (steps)", style=discord.TextStyle.short, placeholder="5", required=True, max_length=3)
+        allowed_role = discord.ui.TextInput(
+            label="Required role (optional)",
+            style=discord.TextStyle.short,
+            placeholder="Role mention or ID (leave blank for none)",
+            required=False,
+            max_length=64,
+        )
 
         async def on_submit(self, modal_interaction: discord.Interaction):
-            await modal_interaction.response.defer(thinking=True)
             try:
                 seconds = parse_duration(self.duration.value)
             except Exception as e:
@@ -1257,6 +1797,14 @@ async def maze(interaction: discord.Interaction):
                 await modal_interaction.response.send_message(f"Invalid length: {e}", ephemeral=True)
                 return
             prize_text = self.prize.value.strip() or "a prize"
+            role_id = None
+            role_input = self.allowed_role.value.strip()
+            if role_input:
+                role, err = resolve_role_from_input(role_input, modal_interaction.guild)
+                if err:
+                    await modal_interaction.response.send_message(err, ephemeral=True)
+                    return
+                role_id = role.id if role else None
             sid = uuid.uuid4().hex[:8]
             end_time = datetime.now(timezone.utc) + timedelta(seconds=seconds)
             seq = [random.choice(['left','middle','right']) for _ in range(length)]
@@ -1272,13 +1820,13 @@ async def maze(interaction: discord.Interaction):
                 'sequence': seq,
                 'winner': None,
                 'index': 0,
+                'allowed_role_id': role_id,
             }
             view = JoinView(sid, bot)
-            embed = discord.Embed(title="Maze Runner: Join", description=f"Prize: {prize_text}")
+            embed = discord.Embed(title=prize_text, description="Maze Runner: Join")
             ts = int(end_time.timestamp())
             embed.add_field(name="Ends", value=f"<t:{ts}:F> (<t:{ts}:R>)")
             embed.add_field(name="Winners", value="1")
-            embed.add_field(name="Mode", value="Maze Runner")
             embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
             embed.add_field(name="Entries", value="0")
             if maze_game['channel_id'] is None:
@@ -1298,6 +1846,288 @@ async def maze(interaction: discord.Interaction):
     await interaction.response.send_modal(MazeModal())
 
 
+@bot.tree.command(name="luckynumber")
+async def luckynumber(interaction: discord.Interaction):
+    """Create a Lucky Number game (guess 1-100)."""
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("Admins only.", ephemeral=True)
+        return
+
+    class LuckyNumberModal(discord.ui.Modal, title="Create Lucky Number"):
+        duration = discord.ui.TextInput(label="Duration (e.g. 30s, 2m)", style=discord.TextStyle.short, placeholder="2m", required=True)
+        prize = discord.ui.TextInput(label="Prize description", style=discord.TextStyle.long, placeholder="Describe the prize", required=True)
+        target_number = discord.ui.TextInput(
+            label="Correct number (1-100, optional)",
+            style=discord.TextStyle.short,
+            placeholder="Leave blank for random",
+            required=False,
+            max_length=3,
+        )
+        allowed_role = discord.ui.TextInput(
+            label="Required role (optional)",
+            style=discord.TextStyle.short,
+            placeholder="Role mention or ID (leave blank for none)",
+            required=False,
+            max_length=64,
+        )
+
+        async def on_submit(self, modal_interaction: discord.Interaction):
+            try:
+                seconds = parse_duration(self.duration.value)
+            except Exception as e:
+                await modal_interaction.response.send_message(f"Invalid duration: {e}", ephemeral=True)
+                return
+            prize_text = self.prize.value.strip() or "a prize"
+            role_id = None
+            role_input = self.allowed_role.value.strip()
+            if role_input:
+                role, err = resolve_role_from_input(role_input, modal_interaction.guild)
+                if err:
+                    await modal_interaction.response.send_message(err, ephemeral=True)
+                    return
+                role_id = role.id if role else None
+
+            sid = uuid.uuid4().hex[:8]
+            end_time = datetime.now(timezone.utc) + timedelta(seconds=seconds)
+            target_input = self.target_number.value.strip()
+            if target_input:
+                try:
+                    target = int(target_input)
+                    if target < 1 or target > 100:
+                        raise ValueError("Out of range")
+                except Exception:
+                    await modal_interaction.response.send_message("Correct number must be a whole number from 1 to 100.", ephemeral=True)
+                    return
+            else:
+                target = random.randint(1, 100)
+            ln_game = {
+                'id': sid,
+                'creator': modal_interaction.user.id,
+                'end_time': end_time.timestamp(),
+                'entries': set(),
+                'guesses': 0,
+                'prize': prize_text,
+                'mode': 'Lucky Number',
+                'channel_id': modal_interaction.channel.id if modal_interaction.channel else None,
+                'message_id': None,
+                'target': target,
+                'allowed_role_id': role_id,
+            }
+
+            view = LuckyNumberView(sid, bot)
+            embed = discord.Embed(title=prize_text, description="Lucky Number: Join")
+            ts = int(end_time.timestamp())
+            embed.add_field(name="Ends", value=f"<t:{ts}:F> (<t:{ts}:R>)", inline=True)
+            embed.add_field(name="Range", value="1-100", inline=True)
+            embed.add_field(name="Winners", value="1", inline=True)
+            embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
+            embed.add_field(name="Guesses", value="0", inline=False)
+
+            if ln_game['channel_id'] is None:
+                await modal_interaction.response.send_message("Cannot determine channel to post Lucky Number.", ephemeral=True)
+                return
+            channel = bot.get_channel(ln_game['channel_id'])
+            if channel is None:
+                await modal_interaction.response.send_message("Channel not found.", ephemeral=True)
+                return
+            msg = await channel.send(embed=embed, view=view)
+            ln_game['message_id'] = msg.id
+            bot.active_luckynumber[sid] = ln_game
+            asyncio.create_task(handle_luckynumber_end(sid, seconds))
+            await modal_interaction.response.send_message(f"Lucky Number created (ends <t:{ts}:F> / <t:{ts}:R>).", ephemeral=True)
+
+    await interaction.response.send_modal(LuckyNumberModal())
+
+
+@bot.tree.command(name="trivia")
+async def trivia(interaction: discord.Interaction):
+    """Create a Trivia game (random winner answers a question)."""
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("Admins only.", ephemeral=True)
+        return
+
+    class TriviaModal(discord.ui.Modal, title="Create Trivia"):
+        duration = discord.ui.TextInput(label="Duration (e.g. 30s, 2m)", style=discord.TextStyle.short, placeholder="2m", required=True)
+        prize = discord.ui.TextInput(label="Prize description", style=discord.TextStyle.long, placeholder="Describe the prize", required=True)
+        difficulty = discord.ui.TextInput(
+            label="Difficulty (easy/medium/hard/nightmare)",
+            style=discord.TextStyle.short,
+            placeholder="easy",
+            required=True,
+            max_length=10,
+        )
+        allowed_role = discord.ui.TextInput(
+            label="Required role (optional)",
+            style=discord.TextStyle.short,
+            placeholder="Role mention or ID (leave blank for none)",
+            required=False,
+            max_length=64,
+        )
+
+        async def on_submit(self, modal_interaction: discord.Interaction):
+            try:
+                seconds = parse_duration(self.duration.value)
+            except Exception as e:
+                await modal_interaction.response.send_message(f"Invalid duration: {e}", ephemeral=True)
+                return
+            prize_text = self.prize.value.strip() or "a prize"
+            diff = self.difficulty.value.strip().lower()
+            if diff not in TRIVIA_BANK:
+                await modal_interaction.response.send_message("Difficulty must be easy, medium, hard, or nightmare.", ephemeral=True)
+                return
+            role_id = None
+            role_input = self.allowed_role.value.strip()
+            if role_input:
+                role, err = resolve_role_from_input(role_input, modal_interaction.guild)
+                if err:
+                    await modal_interaction.response.send_message(err, ephemeral=True)
+                    return
+                role_id = role.id if role else None
+
+            question = random.choice(TRIVIA_BANK[diff])
+            sid = uuid.uuid4().hex[:8]
+            end_time = datetime.now(timezone.utc) + timedelta(seconds=seconds)
+            game = {
+                'id': sid,
+                'creator': modal_interaction.user.id,
+                'end_time': end_time.timestamp(),
+                'entries': set(),
+                'prize': prize_text,
+                'mode': 'Trivia',
+                'channel_id': modal_interaction.channel.id if modal_interaction.channel else None,
+                'message_id': None,
+                'difficulty': diff,
+                'question': question.get('q'),
+                'answer': question.get('a'),
+                'allowed_role_id': role_id,
+            }
+
+            view = JoinView(sid, bot)
+            embed = discord.Embed(title=prize_text, description="Trivia: Join")
+            ts = int(end_time.timestamp())
+            embed.add_field(name="Ends", value=f"<t:{ts}:F> (<t:{ts}:R>)", inline=True)
+            embed.add_field(name="Difficulty", value=diff.title(), inline=True)
+            embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
+            embed.add_field(name="Entries", value="0", inline=False)
+
+            if game['channel_id'] is None:
+                await modal_interaction.response.send_message("Cannot determine channel to post Trivia.", ephemeral=True)
+                return
+            channel = bot.get_channel(game['channel_id'])
+            if channel is None:
+                await modal_interaction.response.send_message("Channel not found.", ephemeral=True)
+                return
+            msg = await channel.send(embed=embed, view=view)
+            game['message_id'] = msg.id
+            bot.active_trivia[sid] = game
+            asyncio.create_task(handle_trivia_end(sid, seconds))
+            await modal_interaction.response.send_message(f"Trivia created (ends <t:{ts}:F> / <t:{ts}:R>).", ephemeral=True)
+
+    await interaction.response.send_modal(TriviaModal())
+
+
+@bot.tree.command(name="don")
+async def don(interaction: discord.Interaction):
+    """Create a Double or Nothing game (winner chooses keep or 50/50 double)."""
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("Admins only.", ephemeral=True)
+        return
+
+    class DonModal(discord.ui.Modal, title="Create Double or Nothing"):
+        duration = discord.ui.TextInput(label="Duration (e.g. 30s, 2m)", style=discord.TextStyle.short, placeholder="2m", required=True)
+        prize = discord.ui.TextInput(label="Prize description", style=discord.TextStyle.long, placeholder="Describe the prize", required=True)
+        risk_mode = discord.ui.TextInput(
+            label="Risk mode (coin / roulette / wheel)",
+            style=discord.TextStyle.short,
+            placeholder="coin",
+            required=True,
+            max_length=12,
+        )
+        allowed_role = discord.ui.TextInput(
+            label="Required role (optional)",
+            style=discord.TextStyle.short,
+            placeholder="Role mention or ID (leave blank for none)",
+            required=False,
+            max_length=64,
+        )
+
+        async def on_submit(self, modal_interaction: discord.Interaction):
+            try:
+                seconds = parse_duration(self.duration.value)
+            except Exception as e:
+                await modal_interaction.response.send_message(f"Invalid duration: {e}", ephemeral=True)
+                return
+            prize_text = self.prize.value.strip() or "a prize"
+            mode_input = self.risk_mode.value.strip().lower()
+            if mode_input in ("coin", "flip", "coinflip"):
+                risk_mode = "coin"
+            elif mode_input in ("roulette", "rr", "russian"):
+                risk_mode = "roulette"
+            elif mode_input in ("wheel", "wheel of fate", "fate"):
+                risk_mode = "wheel"
+            else:
+                await modal_interaction.response.send_message("Risk mode must be coin, roulette, or wheel.", ephemeral=True)
+                return
+            role_id = None
+            role_input = self.allowed_role.value.strip()
+            if role_input:
+                role, err = resolve_role_from_input(role_input, modal_interaction.guild)
+                if err:
+                    await modal_interaction.response.send_message(err, ephemeral=True)
+                    return
+                role_id = role.id if role else None
+
+            sid = uuid.uuid4().hex[:8]
+            end_time = datetime.now(timezone.utc) + timedelta(seconds=seconds)
+            game = {
+                'id': sid,
+                'creator': modal_interaction.user.id,
+                'end_time': end_time.timestamp(),
+                'entries': set(),
+                'prize': prize_text,
+                'base_prize': prize_text,
+                'multiplier': 1,
+                'mode': 'Double or Nothing',
+                'risk_mode': risk_mode,
+                'channel_id': modal_interaction.channel.id if modal_interaction.channel else None,
+                'message_id': None,
+                'allowed_role_id': role_id,
+                'winner': None,
+                'awaiting_choice': False,
+                'finalized': False,
+            }
+
+            view = JoinView(sid, bot)
+            embed = discord.Embed(title=prize_text, description="Double or Nothing: Join")
+            ts = int(end_time.timestamp())
+            embed.add_field(name="Ends", value=f"<t:{ts}:F> (<t:{ts}:R>)", inline=True)
+            embed.add_field(name="Winners", value="1", inline=True)
+            if risk_mode == "coin":
+                risk_label = "Coin Flip (2x, 50%)"
+            elif risk_mode == "roulette":
+                risk_label = "Roulette (5x, 20%)"
+            else:
+                risk_label = "Wheel of Fate (???)"
+            embed.add_field(name="Risk", value=risk_label, inline=True)
+            embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
+            embed.add_field(name="Entries", value="0", inline=False)
+
+            if game['channel_id'] is None:
+                await modal_interaction.response.send_message("Cannot determine channel to post Double or Nothing.", ephemeral=True)
+                return
+            channel = bot.get_channel(game['channel_id'])
+            if channel is None:
+                await modal_interaction.response.send_message("Channel not found.", ephemeral=True)
+                return
+            msg = await channel.send(embed=embed, view=view)
+            game['message_id'] = msg.id
+            bot.active_don[sid] = game
+            asyncio.create_task(handle_don_end(sid, seconds))
+            await modal_interaction.response.send_message(f"Double or Nothing created (ends <t:{ts}:F> / <t:{ts}:R>).", ephemeral=True)
+
+    await interaction.response.send_modal(DonModal())
+
+
 @bot.tree.command(name="sync")
 @app_commands.describe(global_sync="If true, sync commands globally instead of to the guild")
 async def sync(interaction: discord.Interaction, global_sync: bool = False):
@@ -1305,26 +2135,69 @@ async def sync(interaction: discord.Interaction, global_sync: bool = False):
     if interaction.guild and not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message("You must be a server administrator to run this.", ephemeral=True)
         return
-    await interaction.response.defer(thinking=True)
+    await interaction.response.send_message("Syncing commands...", ephemeral=True)
     try:
         if global_sync:
             synced = await bot.tree.sync()
             logging.info("Manually synced %d global commands", len(synced))
             names = ', '.join(c.name for c in synced)
-            await interaction.followup.send(f"Synced {len(synced)} global commands: {names}")
+            await interaction.edit_original_response(content=f"Synced {len(synced)} global commands: {names}")
         else:
             gid = bot._guild_id or (interaction.guild.id if interaction.guild else None)
             if not gid:
-                await interaction.followup.send("No guild id available to sync to.")
+                await interaction.edit_original_response(content="No guild id available to sync to.")
                 return
             guild_obj = discord.Object(id=gid)
             synced = await bot.tree.sync(guild=guild_obj)
             logging.info("Manually synced %d commands to guild %s", len(synced), gid)
             names = ', '.join(c.name for c in synced)
-            await interaction.followup.send(f"Synced {len(synced)} commands to guild {gid}: {names}")
+            await interaction.edit_original_response(content=f"Synced {len(synced)} commands to guild {gid}: {names}")
     except Exception as e:
         logging.exception("Manual sync failed: %s", e)
-        await interaction.followup.send(f"Sync failed: {e}")
+        await interaction.edit_original_response(content=f"Sync failed: {e}")
+
+
+@bot.tree.command(name="addcredit")
+@app_commands.describe(member="Member to add credits to", amount="Credits to add")
+async def addcredit(interaction: discord.Interaction, member: discord.Member, amount: int):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("Admins only.", ephemeral=True)
+        return
+    if amount <= 0:
+        await interaction.response.send_message("Amount must be positive.", ephemeral=True)
+        return
+    async with DATA_LOCK:
+        key = str(member.id)
+        bot.credits[key] = int(bot.credits.get(key, 0)) + int(amount)
+        save_credits(bot.credits)
+        new_total = bot.credits[key]
+    await interaction.response.send_message(f"Added {amount} credits to {member.mention}. New total: {new_total}.", ephemeral=True)
+
+
+@bot.tree.command(name="removecredit")
+@app_commands.describe(member="Member to remove credits from", amount="Credits to remove")
+async def removecredit(interaction: discord.Interaction, member: discord.Member, amount: int):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("Admins only.", ephemeral=True)
+        return
+    if amount <= 0:
+        await interaction.response.send_message("Amount must be positive.", ephemeral=True)
+        return
+    async with DATA_LOCK:
+        key = str(member.id)
+        bot.credits[key] = max(0, int(bot.credits.get(key, 0)) - int(amount))
+        save_credits(bot.credits)
+        new_total = bot.credits[key]
+    await interaction.response.send_message(f"Removed {amount} credits from {member.mention}. New total: {new_total}.", ephemeral=True)
+
+
+@bot.tree.command(name="creditcheck")
+@app_commands.describe(member="Member to check (optional)")
+async def creditcheck(interaction: discord.Interaction, member: Optional[discord.Member] = None):
+    target = member or interaction.user
+    async with DATA_LOCK:
+        total = int(bot.credits.get(str(target.id), 0))
+    await interaction.response.send_message(f"{target.mention} has {total} credits.", ephemeral=True)
 
 
 @bot.tree.command(name="gwend")
@@ -1334,11 +2207,11 @@ async def gwend(interaction: discord.Interaction, message_id: str):
     if not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message("Admins only.", ephemeral=True)
         return
-    await interaction.response.defer(thinking=True)
+    await interaction.response.send_message("Ending giveaway...", ephemeral=True)
     try:
         mid = int(message_id)
     except Exception:
-        await interaction.followup.send("Invalid message id. Provide the numeric message id.", ephemeral=True)
+        await interaction.edit_original_response(content="Invalid message id. Provide the numeric message id.")
         return
 
     async with DATA_LOCK:
@@ -1350,23 +2223,23 @@ async def gwend(interaction: discord.Interaction, message_id: str):
                 found_gw = gw
                 break
         if not found_gid:
-            await interaction.followup.send("No active giveaway found with that message id.", ephemeral=True)
+            await interaction.edit_original_response(content="No active giveaway found with that message id.")
             return
         # permission check: admins only
         if not (interaction.guild and interaction.user.guild_permissions.administrator):
-            await interaction.followup.send("You must be a server administrator to end giveaways.", ephemeral=True)
+            await interaction.edit_original_response(content="You must be a server administrator to end giveaways.")
             return
         # remove giveaway to prevent scheduled handler from running
         gw = bot.active_giveaways.pop(found_gid, None)
 
     if not gw:
-        await interaction.followup.send("Giveaway already ended or not found.", ephemeral=True)
+        await interaction.edit_original_response(content="Giveaway already ended or not found.")
         return
 
     entries = list(gw.get('entries', []))
     channel = bot.get_channel(gw.get('channel_id'))
     if not channel:
-        await interaction.followup.send("Channel for this giveaway could not be found.", ephemeral=True)
+        await interaction.edit_original_response(content="Channel for this giveaway could not be found.")
         return
 
     try:
@@ -1378,6 +2251,8 @@ async def gwend(interaction: discord.Interaction, message_id: str):
     if entries:
         k = min(gw.get('winners', 1), len(entries))
         winners = random.sample(entries, k)
+    if winners:
+        await award_credits_for_prize(bot, winners, gw.get('prize'))
 
     embed = discord.Embed(title="Giveaway Ended Early", description=f"Prize: {gw.get('prize')}")
     embed.add_field(name="Winners", value=', '.join(f"<@{w}>" for w in winners) if winners else "No valid entries")
@@ -1416,7 +2291,7 @@ async def gwend(interaction: discord.Interaction, message_id: str):
     except Exception:
         pass
 
-    await interaction.followup.send("Giveaway ended early.", ephemeral=True)
+    await interaction.edit_original_response(content="Giveaway ended early.")
 
 
 @bot.tree.command(name="reroll")
@@ -1426,28 +2301,28 @@ async def reroll(interaction: discord.Interaction, message_id: str):
     if not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message("Admins only.", ephemeral=True)
         return
-    await interaction.response.defer(thinking=True)
+    await interaction.response.send_message("Rerolling giveaway...", ephemeral=True)
     try:
         mid = int(message_id)
     except Exception:
-        await interaction.followup.send("Invalid message id.", ephemeral=True)
+        await interaction.edit_original_response(content="Invalid message id.")
         return
 
     snapshot = bot.recent_giveaways.get(mid)
     if not snapshot:
-        await interaction.followup.send("No recent giveaway found with that message id.", ephemeral=True)
+        await interaction.edit_original_response(content="No recent giveaway found with that message id.")
         return
 
     # permission check: admins only
     if not (interaction.guild and interaction.user.guild_permissions.administrator):
-        await interaction.followup.send("You must be a server administrator to reroll giveaways.", ephemeral=True)
+        await interaction.edit_original_response(content="You must be a server administrator to reroll giveaways.")
         return
 
     entries = list(snapshot.get('entries', []))
     prev_winners = list(snapshot.get('winners', []))
     k = int(snapshot.get('num_winners', 1))
     if not entries:
-        await interaction.followup.send("No entries to choose from.", ephemeral=True)
+        await interaction.edit_original_response(content="No entries to choose from.")
         return
 
     # prefer to exclude previous winners if possible
@@ -1456,6 +2331,8 @@ async def reroll(interaction: discord.Interaction, message_id: str):
         pool = entries
 
     new_winners = random.sample(pool, min(k, len(pool)))
+    if new_winners:
+        await award_credits_for_prize(bot, new_winners, snapshot.get('prize'))
 
     # update snapshot winners
     snapshot['winners'] = new_winners
@@ -1464,7 +2341,7 @@ async def reroll(interaction: discord.Interaction, message_id: str):
     channel = bot.get_channel(snapshot.get('channel_id'))
     emoji = random.choice(EMOJI_POOL)
     if not channel:
-        await interaction.followup.send("Could not find the channel for this giveaway.", ephemeral=True)
+        await interaction.edit_original_response(content="Could not find the channel for this giveaway.")
         return
 
     if len(new_winners) == 1:
@@ -1487,7 +2364,7 @@ async def reroll(interaction: discord.Interaction, message_id: str):
     except Exception:
         pass
 
-    await interaction.followup.send("Reroll complete.", ephemeral=True)
+    await interaction.edit_original_response(content="Reroll complete.")
 
 
 
@@ -1771,9 +2648,20 @@ async def handle_memory_end(sid: str, delay: int):
         await channel.send(f"{emoji} Congratulations <@{winner}> — you're the contestant for {mem.get('prize')}! Watch the sequence below.")
     except Exception:
         pass
+    try:
+        countdown_msg = await channel.send(f"<@{winner}>, sequence is starting in 5 seconds!")
+    except Exception:
+        countdown_msg = None
     seq = mem.get('sequence', [])
     # wait a few seconds so the winner can read the announcement before the sequence starts
-    await asyncio.sleep(3)
+    for t in (4, 3, 2, 1):
+        await asyncio.sleep(1)
+        if countdown_msg:
+            try:
+                await countdown_msg.edit(content=f"<@{winner}>, sequence is starting in {t} seconds!")
+            except Exception:
+                pass
+    await asyncio.sleep(1)
     try:
         seq_msg = await channel.send("Showing sequence:")
     except Exception:
@@ -1812,6 +2700,10 @@ async def handle_memory_end(sid: str, delay: int):
                 await countdown_msg.delete()
         except Exception:
             pass
+    try:
+        await channel.send(f"<@{winner}>, sequence ended — please check your DMs to enter the sequence you saw.")
+    except Exception:
+        pass
 
     # DM the winner and wait for their typed reply in DMs
     try:
@@ -1861,14 +2753,16 @@ async def handle_memory_end(sid: str, delay: int):
                     norm_ans = ''.join(answer.split())
                     norm_expected = ''.join(seq)
                     correct = norm_ans == norm_expected
+                    display_correct = " ".join(seq)
                     if correct:
                         try:
                             await channel.send(f"<@{winner}> submitted: {answer} — correct! WON {mem.get('prize')}!")
                         except Exception:
                             pass
+                        await award_credits_for_prize(bot, [winner], mem.get('prize'))
                     else:
                         try:
-                            await channel.send(f"<@{winner}> submitted: {answer} — incorrect for {mem.get('prize')}.")
+                            await channel.send(f"<@{winner}> responded with: {answer} — but the correct sequence is: {display_correct}. They did not win {mem.get('prize')}.")
                         except Exception:
                             pass
                     async with DATA_LOCK:
@@ -1897,6 +2791,491 @@ async def handle_memory_end(sid: str, delay: int):
                     return
     except Exception:
         logging.exception("Error DMing memory winner or waiting for response")
+
+
+async def handle_luckynumber_end(sid: str, delay: int):
+    await asyncio.sleep(delay)
+    async with DATA_LOCK:
+        game = bot.active_luckynumber.pop(sid, None)
+    if not game:
+        return
+    channel = bot.get_channel(game.get('channel_id'))
+    if not channel:
+        return
+    message = None
+    if game.get('message_id'):
+        try:
+            message = await channel.fetch_message(game.get('message_id'))
+        except Exception:
+            message = None
+
+    prize = game.get('prize')
+    guesses_count = game.get('guesses', 0)
+    target = game.get('target')
+    embed = discord.Embed(title="Lucky Number Ended", description=f"Prize: {prize}")
+    embed.add_field(name="Number", value=str(target), inline=True)
+    embed.add_field(name="Guesses", value=str(guesses_count), inline=True)
+    embed.add_field(name="Result", value="No one guessed the number in time.", inline=False)
+    if message:
+        try:
+            await message.edit(embed=embed, view=None)
+        except Exception:
+            await channel.send(embed=embed)
+    else:
+        await channel.send(embed=embed)
+
+
+async def finalize_luckynumber(sid: str, winner_id: int, guess: int):
+    async with DATA_LOCK:
+        game = bot.active_luckynumber.pop(sid, None)
+    if not game:
+        return
+    channel = bot.get_channel(game.get('channel_id'))
+    if not channel:
+        return
+    message = None
+    if game.get('message_id'):
+        try:
+            message = await channel.fetch_message(game.get('message_id'))
+        except Exception:
+            message = None
+
+    prize = game.get('prize')
+    guesses_count = game.get('guesses', 0)
+    target = game.get('target')
+    embed = discord.Embed(title="Lucky Number Won", description=f"Prize: {prize}")
+    embed.add_field(name="Winner", value=f"<@{winner_id}>", inline=True)
+    embed.add_field(name="Number", value=str(target), inline=True)
+    embed.add_field(name="Guesses", value=str(guesses_count), inline=True)
+    if message:
+        try:
+            await message.edit(embed=embed, view=None)
+        except Exception:
+            await channel.send(embed=embed)
+    else:
+        await channel.send(embed=embed)
+    emoji = random.choice(EMOJI_POOL)
+    try:
+        await channel.send(f"{emoji} <@{winner_id}> guessed **{guess}** and WON {prize}! {emoji}")
+    except Exception:
+        pass
+    await award_credits_for_prize(bot, [winner_id], prize)
+
+
+async def handle_trivia_end(sid: str, delay: int):
+    await asyncio.sleep(delay)
+    async with DATA_LOCK:
+        game = bot.active_trivia.get(sid)
+        if not game:
+            return
+        bot.active_trivia[sid] = game
+    entries = list(game.get('entries', []))
+    channel = bot.get_channel(game.get('channel_id'))
+    if not channel:
+        return
+    message = None
+    if game.get('message_id'):
+        try:
+            message = await channel.fetch_message(game.get('message_id'))
+        except Exception:
+            message = None
+    if not entries:
+        embed = discord.Embed(title="Trivia Ended", description=f"Prize: {game.get('prize')}")
+        embed.add_field(name="Result", value="No entries — game cancelled", inline=False)
+        if message:
+            await message.edit(embed=embed, view=None)
+        else:
+            await channel.send(embed=embed)
+        async with DATA_LOCK:
+            bot.active_trivia.pop(sid, None)
+        return
+
+    # pick a random winner to answer
+    winner_id = random.choice(entries)
+    question = game.get('question')
+    answer = str(game.get('answer', '')).strip()
+    prize = game.get('prize')
+
+    # announce selection in channel
+    try:
+        await channel.send(
+            f"🎯 <@{winner_id}> has been selected for Trivia! "
+            f"Check your DMs and answer within 60 seconds."
+        )
+    except Exception:
+        pass
+
+    # DM the winner
+    user = bot.get_user(winner_id)
+    if not user:
+        try:
+            user = await bot.fetch_user(winner_id)
+        except Exception:
+            user = None
+    if not user:
+        await channel.send("Trivia ended — could not contact the chosen winner.")
+        async with DATA_LOCK:
+            bot.active_trivia.pop(sid, None)
+        return
+
+    try:
+        await user.send(
+            f"You were selected for Trivia! Answer this within 60 seconds:\n"
+            f"**Question:** {question}\n"
+            f"Reply with just your answer."
+        )
+    except Exception:
+        await channel.send(f"Trivia ended — could not DM <@{winner_id}>.")
+        async with DATA_LOCK:
+            bot.active_trivia.pop(sid, None)
+        return
+
+    def check(msg: discord.Message):
+        return msg.author.id == winner_id and isinstance(msg.channel, discord.DMChannel)
+
+    response_text = None
+    correct = False
+    deadline = datetime.now(timezone.utc) + timedelta(seconds=60)
+    while True:
+        remaining = (deadline - datetime.now(timezone.utc)).total_seconds()
+        if remaining <= 0:
+            response_text = None
+            correct = False
+            break
+        try:
+            msg = await bot.wait_for("message", timeout=remaining, check=check)
+        except asyncio.TimeoutError:
+            response_text = None
+            correct = False
+            break
+
+        candidate = msg.content.strip()
+        # confirm answer
+        try:
+            view = TriviaConfirmView(winner_id)
+            await msg.channel.send(f'Lock in this answer?\n"{candidate}"', view=view)
+            await view.wait()
+        except Exception:
+            view = None
+
+        if not view or view.confirmed is True:
+            response_text = candidate
+            correct = response_text.lower() == answer.lower()
+            break
+        if view.confirmed is False:
+            try:
+                await msg.channel.send("Okay — reply again with your final answer.")
+            except Exception:
+                pass
+            continue
+
+    # announce the question and their response right after they reply (green if correct, red if not)
+    if response_text is not None:
+        try:
+            outcome = f"Correct! They win {prize}." if correct else "Incorrect — no winner."
+            if not correct and answer:
+                outcome = f"Incorrect — correct answer: {answer}."
+            color = discord.Color.green() if correct else discord.Color.red()
+            try:
+                await channel.send(f"<@{winner_id}> — your response is in!")
+            except Exception:
+                pass
+            quick = discord.Embed(title="Trivia Response", color=color)
+            quick.add_field(name="Winner", value=f"<@{winner_id}>", inline=True)
+            quick.add_field(name="Question", value=question, inline=False)
+            quick.add_field(name="Answer", value=response_text, inline=False)
+            quick.add_field(name="Outcome", value=outcome, inline=False)
+            await channel.send(embed=quick)
+        except Exception:
+            pass
+
+    # announce in channel (summary only)
+    entries_count = len(entries)
+    result_embed = discord.Embed(title="Trivia Ended", description=f"Prize: {prize}")
+    result_embed.add_field(name="Winner", value=f"<@{winner_id}>", inline=True)
+    result_embed.add_field(name="Entries", value=str(entries_count), inline=True)
+    if response_text is None:
+        result_embed.add_field(name="Result", value="No response in time — no winner.", inline=False)
+    elif correct:
+        result_embed.add_field(name="Result", value=f"Correct — <@{winner_id}> wins {prize}!", inline=False)
+    else:
+        result_embed.add_field(name="Result", value="Incorrect — no winner.", inline=False)
+
+    if message:
+        try:
+            await message.edit(embed=result_embed, view=None)
+        except Exception:
+            await channel.send(embed=result_embed)
+    else:
+        await channel.send(embed=result_embed)
+
+    if correct:
+        await award_credits_for_prize(bot, [winner_id], prize)
+
+    async with DATA_LOCK:
+        bot.active_trivia.pop(sid, None)
+
+
+async def handle_don_end(sid: str, delay: int):
+    await asyncio.sleep(delay)
+    async with DATA_LOCK:
+        game = bot.active_don.get(sid)
+        if not game:
+            return
+    entries = list(game.get('entries', []))
+    channel = bot.get_channel(game.get('channel_id'))
+    if not channel:
+        return
+    message = None
+    if game.get('message_id'):
+        try:
+            message = await channel.fetch_message(game.get('message_id'))
+        except Exception:
+            message = None
+
+    if not entries:
+        embed = discord.Embed(title="Double or Nothing Ended", description=f"Prize: {game.get('prize')}")
+        embed.add_field(name="Result", value="No entries — game cancelled", inline=False)
+        if message:
+            await message.edit(embed=embed, view=None)
+        else:
+            await channel.send(embed=embed)
+        async with DATA_LOCK:
+            bot.active_don.pop(sid, None)
+        return
+
+    winner = random.choice(entries)
+    async with DATA_LOCK:
+        game = bot.active_don.get(sid)
+        if not game:
+            return
+        game['winner'] = winner
+        bot.active_don[sid] = game
+
+    # update embed to show winner selected
+    try:
+        embed = discord.Embed(title="Double or Nothing Ended", description=f"Prize: {game.get('prize')}")
+        embed.add_field(name="Winner", value=f"<@{winner}>", inline=True)
+        embed.add_field(name="Entries", value=str(len(entries)), inline=True)
+        embed.add_field(name="Status", value="Winner selected — check DMs to choose.", inline=False)
+        if message:
+            await message.edit(embed=embed, view=None)
+        else:
+            await channel.send(embed=embed)
+    except Exception:
+        pass
+
+    # announce and DM the winner
+    try:
+        emoji = random.choice(EMOJI_POOL)
+        await channel.send(f"{emoji} <@{winner}> — you're up! Check your DMs to choose Keep or Double.")
+    except Exception:
+        pass
+
+    user = bot.get_user(winner)
+    if not user:
+        try:
+            user = await bot.fetch_user(winner)
+        except Exception:
+            user = None
+    if not user:
+        await channel.send("Could not DM the winner. Double or Nothing ended.")
+        async with DATA_LOCK:
+            bot.active_don.pop(sid, None)
+        return
+    try:
+        prize_text = format_prize_with_multiplier(game.get('base_prize'), game.get('multiplier', 1))
+        view = DonChoiceView(sid, winner, bot)
+        await user.send(
+            f"You won {prize_text}! Choose **Keep** to secure it, or **Double (50/50)** to try for double.",
+            view=view,
+        )
+        async with DATA_LOCK:
+            game = bot.active_don.get(sid)
+            if game:
+                game['awaiting_choice'] = True
+                bot.active_don[sid] = game
+    except Exception:
+        await channel.send(f"Could not DM <@{winner}>. Double or Nothing ended.")
+        async with DATA_LOCK:
+            bot.active_don.pop(sid, None)
+        return
+
+
+async def process_don_choice(botref, sid: str, uid: int, choice: str):
+    async with DATA_LOCK:
+        game = botref.active_don.get(sid)
+        if not game:
+            return
+        if game.get('finalized'):
+            return
+        if not game.get('awaiting_choice'):
+            return
+        game['awaiting_choice'] = False
+        botref.active_don[sid] = game
+        channel = botref.get_channel(game.get('channel_id'))
+        message_id = game.get('message_id')
+        base_prize = game.get('base_prize', game.get('prize'))
+        multiplier = int(game.get('multiplier', 1))
+        risk_mode = game.get('risk_mode', 'coin')
+        prize = format_prize_with_multiplier(base_prize, multiplier)
+
+    result_embed = discord.Embed(title="Double or Nothing Result", description=f"Prize: {prize}")
+    result_embed.add_field(name="Winner", value=f"<@{uid}>", inline=True)
+    result_embed.add_field(name="Choice", value=choice.title(), inline=True)
+
+    if choice == "keep":
+        outcome_text = f"<@{uid}> kept the prize: {prize}."
+        result_embed.add_field(name="Outcome", value=outcome_text, inline=False)
+        async with DATA_LOCK:
+            game = botref.active_don.get(sid)
+            if game:
+                game['finalized'] = True
+                botref.active_don[sid] = game
+        await award_credits_for_prize(botref, [uid], base_prize, multiplier=multiplier)
+    else:
+        # visible risk animation in-channel
+        if channel:
+            try:
+                if risk_mode == "coin":
+                    await channel.send(f"<@{uid}> chose to risk and **double** it — coin flip is starting now.")
+                    flip_msg = await channel.send("🪙 Flipping coin...")
+                    for _ in range(3):
+                        await asyncio.sleep(0.6)
+                        await flip_msg.edit(content=f"🪙 Flipping coin... **{random.choice(['Heads','Tails'])}**")
+                    await asyncio.sleep(0.6)
+                    flip_face = random.choice(["Heads", "Tails"])
+                    await flip_msg.edit(content=f"🪙 Coin landed on **{flip_face}**")
+                else:
+                    if risk_mode == "roulette":
+                        await channel.send(f"<@{uid}> chose to risk and **double** it — roulette is spinning now.")
+                        roll_msg = await channel.send("🎯 Spinning chambers...")
+                        for _ in range(4):
+                            await asyncio.sleep(0.5)
+                            await roll_msg.edit(content=f"🎯 Spinning chambers... **{random.randint(1,5)}/5**")
+                        await asyncio.sleep(0.6)
+                        chamber = random.randint(1,5)
+                        await roll_msg.edit(content=f"🎯 Chamber landed on **{chamber}/5**")
+                    else:
+                        await channel.send(f"<@{uid}> chose to risk and **double** it — wheel is spinning now.")
+                        wheel_msg = await channel.send("🎡 Spinning the Wheel of Fate...")
+                        for _ in range(4):
+                            await asyncio.sleep(0.5)
+                            await wheel_msg.edit(content=f"🎡 Wheel of Fate... **{random.choice(['50%','33%','25%','20%'])}**")
+                        await asyncio.sleep(0.6)
+                        await wheel_msg.edit(content="🎡 Wheel of Fate stopped.")
+            except Exception:
+                pass
+
+        if risk_mode == "coin":
+            win = (flip_face == "Heads")
+            display_roll = f"Coin: {flip_face}"
+            win_multiplier = 2
+            odds_text = "50%"
+        elif risk_mode == "roulette":
+            win = (chamber == 1)
+            display_roll = f"Chamber: {chamber}/5"
+            win_multiplier = 5
+            odds_text = "20%"
+        else:
+            # wheel of fate: random odds/multiplier each spin
+            wheel_options = [
+                (0.5, 2, "50%"),
+                (0.33, 3, "33%"),
+                (0.25, 4, "25%"),
+                (0.2, 5, "20%"),
+            ]
+            chance, win_multiplier, odds_text = random.choice(wheel_options)
+            win = random.random() < chance
+            display_roll = f"Wheel: {odds_text}"
+
+        if win:
+            new_multiplier = multiplier * win_multiplier
+            doubled = format_prize_with_multiplier(base_prize, new_multiplier)
+            if risk_mode == "coin":
+                outcome_text = f"Coin flip {flip_face} — WIN! <@{uid}> doubles to {doubled}! You can choose to keep or double again."
+            elif risk_mode == "roulette":
+                outcome_text = f"Roulette {display_roll} — WIN! <@{uid}> boosts to {doubled}! You can choose to keep or double again."
+            else:
+                outcome_text = f"Wheel of Fate {display_roll} — WIN! <@{uid}> boosts to {doubled}! You can choose to keep or double again."
+            result_embed.add_field(name="Risk Roll", value=display_roll, inline=True)
+            result_embed.add_field(name="Odds", value=odds_text, inline=True)
+            result_embed.add_field(name="Outcome", value=outcome_text, inline=False)
+            # allow another decision
+            async with DATA_LOCK:
+                game = botref.active_don.get(sid)
+                if not game:
+                    return
+                game['multiplier'] = new_multiplier
+                game['awaiting_choice'] = True
+                botref.active_don[sid] = game
+            # DM again for next choice
+            try:
+                user = botref.get_user(uid) or await botref.fetch_user(uid)
+                if user:
+                    view = DonChoiceView(sid, uid, botref)
+                    if risk_mode == "coin":
+                        await user.send(
+                            f"You won the coin flip! Your prize is now {doubled}. "
+                            f"Choose **Keep** to secure it, or **Double (50/50)** to risk it again.",
+                            view=view,
+                        )
+                    elif risk_mode == "roulette":
+                        await user.send(
+                            f"You won the roulette! Your prize is now {doubled}. "
+                            f"Choose **Keep** to secure it, or **Double (20%)** to risk it again.",
+                            view=view,
+                        )
+                    else:
+                        await user.send(
+                            f"You won the Wheel of Fate! Your prize is now {doubled}. "
+                            f"Choose **Keep** to secure it, or **Double (??%)** to risk it again.",
+                            view=view,
+                        )
+            except Exception:
+                pass
+        else:
+            if risk_mode == "coin":
+                outcome_text = f"Coin flip {flip_face} — LOSS. <@{uid}> gets nothing."
+            elif risk_mode == "roulette":
+                outcome_text = f"Roulette {display_roll} — LOSS. <@{uid}> gets nothing."
+            else:
+                outcome_text = f"Wheel of Fate {display_roll} — LOSS. <@{uid}> gets nothing."
+            result_embed.add_field(name="Risk Roll", value=display_roll, inline=True)
+            result_embed.add_field(name="Odds", value=odds_text, inline=True)
+            result_embed.add_field(name="Outcome", value=outcome_text, inline=False)
+            async with DATA_LOCK:
+                game = botref.active_don.get(sid)
+                if game:
+                    game['finalized'] = True
+                    botref.active_don[sid] = game
+
+    # edit original message if possible, otherwise post a new one
+    if channel:
+        if message_id:
+            try:
+                msg = await channel.fetch_message(message_id)
+            except Exception:
+                msg = None
+            if msg:
+                try:
+                    await msg.edit(embed=result_embed, view=None)
+                except Exception:
+                    await channel.send(embed=result_embed)
+            else:
+                await channel.send(embed=result_embed)
+        else:
+            await channel.send(embed=result_embed)
+        # announce result in-channel (always ping the winner)
+        try:
+            await channel.send(outcome_text)
+        except Exception:
+            pass
+
+    async with DATA_LOCK:
+        game = botref.active_don.get(sid)
+        if game and game.get('finalized'):
+            botref.active_don.pop(sid, None)
 
 
 async def handle_maze_end(sid: str, delay: int):
@@ -1994,123 +3373,114 @@ async def handle_reactroulette_end(sid: str, delay: int):
     options = rr.get('options', [])
     if not options:
         return
-    # choose winning emoji
-    winning = random.choice(options)
-    # If there are join entries, prefer them as candidates (giveaway-style).
+    # pick 3 emojis for the actual roulette (supports option counts > 3)
+    try:
+        play_options = random.sample(options, k=min(3, len(options)))
+    except Exception:
+        play_options = options[:3]
     entries = list(rr.get('entries', []))
-    candidates = []
+    winner = None
     if entries:
-        # choose up to 3 random joiners
-        try:
-            candidates = random.sample(entries, k=min(3, len(entries)))
-        except Exception:
-            candidates = entries[:3]
+        winner = random.choice(entries)
     else:
-        # fallback: gather reactors for the winning emoji (preserve order as returned)
+        # fallback: pick from anyone who reacted to the message
         reactors = []
         try:
             if msg:
                 for react in msg.reactions:
-                    try:
-                        if str(react.emoji) == winning:
-                            users = [u async for u in react.users()]
-                            users = [u for u in users if u.id != bot.user.id]
-                            reactors = [u.id for u in users]
-                            break
-                    except Exception:
-                        continue
+                    users = [u async for u in react.users()]
+                    users = [u for u in users if u.id != bot.user.id]
+                    reactors.extend([u.id for u in users])
         except Exception:
             reactors = []
-
-        # prefer recorded first reactor (if it exists and isn't already first)
-        fr = rr.get('first_reactors', {})
-        primary = fr.get(winning)
-        if primary and primary in reactors:
-            # move primary to front
-            reactors = [primary] + [r for r in reactors if r != primary]
-        elif primary and primary not in reactors:
-            # if primary recorded but not in list, prepend
-            reactors = [primary] + reactors
-
-        # pick up to 3 candidates
-        candidates = []
-        seen = set()
-        for r in reactors:
-            if r in seen:
-                continue
-            seen.add(r)
-            candidates.append(r)
-            if len(candidates) >= 3:
-                break
+        reactors = list(dict.fromkeys(reactors))
+        if reactors:
+            winner = random.choice(reactors)
 
     emoji = random.choice(EMOJI_POOL)
-    # sequentially DM up to 3 winners (from join entries) to choose the winning emoji in DM
-    winner_announced = False
-    for candidate in candidates:
+    if not winner:
         try:
-            user = bot.get_user(candidate)
-            if not user:
-                continue
-            # DM the candidate with the options and ask them to react with their choice
-            try:
-                opts_display = ' '.join(options)
-                dm = await user.send(f"You are one of the selected contenders for Reaction Roulette for {rr.get('prize')}. React with your choice from: {opts_display}")
-            except Exception:
-                # cannot DM this candidate; skip to next
-                continue
-
-            # announce contender in channel and add option reactions in DM
-            try:
-                await channel.send(f"{random.choice(EMOJI_POOL)} Reaction Guess: Congrats <@{candidate}> — check your DMs! You have 5 minutes to choose the reaction.")
-            except Exception:
-                pass
-
-            for e in options:
-                try:
-                    await dm.add_reaction(e)
-                except Exception:
-                    pass
-
-            # wait for this user's reaction in DM (5 minutes)
-            def check(reaction, usr):
-                return usr.id == candidate and reaction.message.id == dm.id and str(reaction.emoji) in options
-
-            try:
-                reaction, usr = await bot.wait_for('reaction_add', check=check, timeout=300)
-            except asyncio.TimeoutError:
-                try:
-                    await user.send("Time expired for your choice — moving to next contender.")
-                except Exception:
-                    pass
-                continue
-
-            chosen = str(reaction.emoji)
-            # send a DM acknowledgement that their answer was submitted
-            try:
-                await usr.send("Your answer has been submitted. Good luck!")
-            except Exception:
-                pass
-
-            if chosen == winning:
-                # announce winner in channel
-                try:
-                    await channel.send(f"{emoji} Reaction Guess: {winning} was chosen — <@{candidate}> selected it and wins {rr.get('prize')}! {emoji}")
-                except Exception:
-                    pass
-                winner_announced = True
-                break
-            else:
-                try:
-                    await user.send(f"You selected {chosen} which is not the winning option. Moving to next contender.")
-                except Exception:
-                    pass
-                continue
+            await channel.send(f"{emoji} Reaction Roulette ended — no entries, no winner.")
         except Exception:
-            continue
+            pass
+        return
 
-    if not winner_announced:
+    try:
+        await channel.send(f"{emoji} Reaction Roulette started — <@{winner}> was selected! Check your DMs to pick an emoji.")
+    except Exception:
+        pass
+
+    # DM the winner with 3 emoji buttons
+    try:
+        user = bot.get_user(winner)
+        if not user:
+            user = await bot.fetch_user(winner)
+        if not user:
+            raise Exception("User not found")
+        pick_view = ReactRouletteChoiceView(sid, winner, bot, play_options)
+        opts_display = ' '.join(play_options)
+        await user.send(
+            f"You were selected for Reaction Roulette for {rr.get('prize')}!\n"
+            f"Pick one of these emojis: {opts_display}",
+            view=pick_view
+        )
+    except Exception:
         try:
-            await channel.send(f"{emoji} Reaction Roulette result: {winning} was chosen but no contender selected it — no winner.")
+            await channel.send(f"{emoji} Could not DM <@{winner}> — no winner.")
+        except Exception:
+            pass
+        return
+
+    # wait for the winner's pick
+    await pick_view.wait()
+    if not pick_view.chosen:
+        try:
+            await channel.send(f"{emoji} <@{winner}> did not choose in time — no winner.")
+        except Exception:
+            pass
+        return
+
+    chosen = pick_view.chosen
+    # run roulette animation in channel
+    try:
+        roulette_msg = await channel.send(
+            f"🎰 Roulette for <@{winner}>\n"
+            f"`{' '.join(play_options)}`\n"
+            f"`{' '.join(['🔴' for _ in play_options])}`"
+        )
+    except Exception:
+        roulette_msg = None
+
+    final_index = random.randint(0, len(play_options) - 1)
+    steps = random.randint(12, 18)
+    for i in range(steps):
+        idx = i % len(play_options)
+        if i == steps - 1:
+            idx = final_index
+        lights = ["🔴" for _ in play_options]
+        lights[idx] = "🟢"
+        if roulette_msg:
+            try:
+                roulette_content = (
+                    f"🎰 Roulette for <@{winner}>\n"
+                    f"`{' '.join(play_options)}`\n"
+                    f"`{' '.join(lights)}`"
+                )
+                await roulette_msg.edit(content=roulette_content)
+            except Exception:
+                pass
+        await asyncio.sleep(0.6)
+
+    landed = play_options[final_index]
+    if chosen == landed:
+        try:
+            await channel.send(f"{emoji} <@{winner}> picked {chosen} — roulette landed on {landed}. They WON {rr.get('prize')}! {emoji}")
+        except Exception:
+            pass
+        await award_credits_for_prize(bot, [winner], rr.get('prize'))
+    else:
+        try:
+            await channel.send(f"{emoji} <@{winner}> picked {chosen} — roulette landed on {landed}. They did not win {rr.get('prize')}.")
         except Exception:
             pass
 
@@ -2122,15 +3492,29 @@ async def reactroulette(interaction: discord.Interaction):
         duration = discord.ui.TextInput(label="Duration (e.g. 30s, 1m)", style=discord.TextStyle.short, placeholder="30s", required=True)
         prize = discord.ui.TextInput(label="Prize description", style=discord.TextStyle.long, placeholder="Describe the prize", required=True)
         options = discord.ui.TextInput(label="Options (comma-separated emoji count)", style=discord.TextStyle.short, placeholder="3", required=False)
+        allowed_role = discord.ui.TextInput(
+            label="Required role (optional)",
+            style=discord.TextStyle.short,
+            placeholder="Role mention or ID (leave blank for none)",
+            required=False,
+            max_length=64,
+        )
 
         async def on_submit(self, modal_interaction: discord.Interaction):
-            await modal_interaction.response.defer(thinking=True)
             try:
                 seconds = parse_duration(self.duration.value)
             except Exception as e:
                 await modal_interaction.response.send_message(f"Invalid duration: {e}", ephemeral=True)
                 return
             prize_text = self.prize.value.strip() or "a prize"
+            role_id = None
+            role_input = self.allowed_role.value.strip()
+            if role_input:
+                role, err = resolve_role_from_input(role_input, modal_interaction.guild)
+                if err:
+                    await modal_interaction.response.send_message(err, ephemeral=True)
+                    return
+                role_id = role.id if role else None
             try:
                 opt_count = int(self.options.value.strip() or 3)
                 opt_count = max(2, min(6, opt_count))
@@ -2149,6 +3533,7 @@ async def reactroulette(interaction: discord.Interaction):
                 'options': opts,
                 'first_reactors': {},
                 'entries': set(),
+                'allowed_role_id': role_id,
             }
             if rr['channel_id'] is None:
                 await modal_interaction.response.send_message("Cannot determine channel to post.", ephemeral=True)
@@ -2158,10 +3543,10 @@ async def reactroulette(interaction: discord.Interaction):
                 await modal_interaction.response.send_message("Channel not found.", ephemeral=True)
                 return
             opts_display = ' '.join(opts)
-            embed = discord.Embed(title="Reaction Roulette", description=f"React with one of the options to try to win: {opts_display}")
-            embed.add_field(name="Prize", value=prize_text)
+            embed = discord.Embed(title=prize_text, description="Reaction Roulette")
+            embed.add_field(name="Ends", value=f"<t:{int(rr['end_time'])}:R>", inline=True)
+            embed.add_field(name="Entries", value="0", inline=True)
             embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
-            embed.add_field(name="Ends", value=f"<t:{int(rr['end_time'])}:R>")
             view = JoinView(sid, bot)
             msg = await channel.send(embed=embed, view=view)
             rr['message_id'] = msg.id
@@ -2242,6 +3627,7 @@ async def process_dbd_choice(botref, sid: str, uid: int, choice: str):
             await channel.send(f"<@{uid}> chose to KEEP the prize: {display}")
         except Exception:
             pass
+        await award_credits_for_prize(botref, [uid], base, multiplier=mult)
         # DM winner confirmation
         try:
             user = botref.get_user(uid)
@@ -2274,6 +3660,7 @@ async def process_dbd_choice(botref, sid: str, uid: int, choice: str):
                 await channel.send(f"<@{uid}> tried to DOUBLE but no other players available. They keep the prize: {display}")
             except Exception:
                 pass
+            await award_credits_for_prize(botref, [uid], base, multiplier=mult)
             try:
                 user = botref.get_user(uid)
                 await user.send(f"No other players available to double. You keep the prize: {display}")
@@ -2366,14 +3753,18 @@ async def finalize_sos(sid: str):
         # compute each player's share using suffix-aware division
         share = format_prize_divided(prize, 2)
         verdict = f"{f'<@{winners[0]}>'} {f'<@{winners[1]}>'} will equally share {prize}! Each receives {share}."
+        quote = '"Mercy is expensive - you both paid it." - respect earned.'
+        await award_credits_for_prize(bot, winners, prize, split=2)
     elif c0 == 'steal' and c1 == 'steal':
         verdict = "Both players chose steal — no one gets anything."
+        quote = '"Greed is symmetric. Nobody wins." - outcome locked.'
     else:
         if c0 == 'steal' or c1 == 'steal':
             stealer = winners[0] if c0 == 'steal' else winners[1]
             verdict = f"Giveaway result: <@{stealer}> wins — they get {prize}!"
             # special flourish when one split and one steal
-            quote = '"The ultimate betrayal." — what a backstab.'
+            quote = '"Trust is the first casualty." - cold game.'
+            await award_credits_for_prize(bot, [stealer], prize)
 
     emoji = random.choice(EMOJI_POOL)
     # color: green when both split, red otherwise (any steal)
@@ -2492,6 +3883,11 @@ async def finalize_rps(sid: str):
     emoji = random.choice(EMOJI_POOL)
     if channel:
         await channel.send(f"{emoji} {result_text} {emoji}")
+
+    # award credits to winner if any
+    if winner_mention:
+        winner_id = a if winner_mention == f"<@{a}>" else b
+        await award_credits_for_prize(bot, [winner_id], prize)
 
     async with DATA_LOCK:
         bot.active_rps.pop(sid, None)
@@ -2635,6 +4031,7 @@ async def handle_auction_end(aid: str, delay: int):
             await channel.send(f"🏆 Auction ended — Congratulations <@{winner_id}>! You won {auc.get('prize')} with a bid of {amt:,}. Check your DMs.")
         except Exception:
             pass
+        await award_credits_for_prize(bot, [winner_id], auc.get('prize'))
         # DM winner
         try:
             user = bot.get_user(winner_id)
@@ -2662,7 +4059,6 @@ async def auction(interaction: discord.Interaction):
         min_bid = discord.ui.TextInput(label="Minimum bid (e.g. 1k)", style=discord.TextStyle.short, required=True)
 
         async def on_submit(self, modal_interaction: discord.Interaction):
-            await modal_interaction.response.defer(thinking=True)
             try:
                 seconds = parse_duration(self.duration.value)
             except Exception as e:
@@ -2690,7 +4086,7 @@ async def auction(interaction: discord.Interaction):
                 'mode': 'Auction',
             }
             view = PlaceBidView(aid, bot)
-            embed = discord.Embed(title="Auction", description=f"Item: {prize_text}")
+            embed = discord.Embed(title=prize_text, description="Auction")
             ts = int(end_time.timestamp())
             embed.add_field(name="Minimum Bid", value=f"{min_amt:,}")
             embed.add_field(name="Host", value=f"<@{modal_interaction.user.id}>", inline=False)
